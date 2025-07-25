@@ -1,4 +1,4 @@
-import { Connection, DefinitionLink } from 'vscode-languageserver/node'
+import { Connection, DefinitionLink, Hover } from 'vscode-languageserver/node'
 import TTypedEventEmitter from 'typed-emitter'
 
 export type Data = {
@@ -9,6 +9,7 @@ export type Data = {
 type MessageMap = {
   data: (payload: Data) => void
   defintionHandled: (defintion: DefinitionLink) => void
+  hoverHandled: (defintion: Hover) => void
 }
 
 export type TypedEventEmitter = TTypedEventEmitter<MessageMap>

@@ -8,6 +8,7 @@ import { TypedEventEmitter } from './types/message'
 import { EventEmitter } from 'node:events'
 import twig from './twig'
 import definitionHandler from './handler/definitionHandler'
+import hoverHandler from './handler/hoverHandler'
 
 const documents = new TextDocuments(TextDocument)
 const connection = createConnection(ProposedFeatures.all)
@@ -25,7 +26,7 @@ connection.onInitialize((params) => {
   return {
     capabilities: {
       definitionProvider: true,
-      // hoverProvider: true,
+      hoverProvider: true,
       // typeDefinitionProvider: true
     },
   }
@@ -47,6 +48,21 @@ connection.onDefinition((params) => {
   }
 
   return Array.isArray(result) ? result : [result]
+})
+
+connection.onHover((params) => {
+  const document = documents.get(params.textDocument.uri)
+  if (!document) {
+    return null
+  }
+
+  const result = hoverHandler(document, params, emitter)
+
+  if (!result) {
+    return null
+  }
+
+  return result
 })
 
 documents.listen(connection)
