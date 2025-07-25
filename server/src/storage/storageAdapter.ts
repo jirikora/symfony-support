@@ -7,9 +7,6 @@ export function storageAdapter() {
   return {
     twig() {
       return {
-        all() {
-          return twigStorage.all()
-        },
         get(key: string) {
           return twigStorage.get(key)
         },

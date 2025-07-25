@@ -9,7 +9,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import { storageAdapter } from '../storage/storageAdapter'
 import { TypedEventEmitter } from '../types/message'
 
-const items = storageAdapter().twig().all()
+const items = storageAdapter().twig()
 
 function phpHandler() {
   return {

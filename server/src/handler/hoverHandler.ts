@@ -3,7 +3,7 @@ import { storageAdapter } from '../storage/storageAdapter'
 import { Hover, HoverParams, Position, Range } from 'vscode-languageserver'
 import { TypedEventEmitter } from '../types/message'
 
-const items = storageAdapter().twig().all()
+const items = storageAdapter().twig()
 
 function phpHandler() {
   return {
