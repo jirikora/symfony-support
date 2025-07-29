@@ -1,11 +1,18 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { storageAdapter } from '../storage/storageAdapter'
-import { Hover, HoverParams, Position, Range } from 'vscode-languageserver'
+import {
+  Hover,
+  HoverParams,
+  MarkupKind,
+  Position,
+  Range,
+} from 'vscode-languageserver'
 import { TypedEventEmitter } from '../types/message'
+import matchTwigFilters from './matcher/matchTwigFilters'
 
 const items = storageAdapter().twig()
 
-function phpHandler() {
+function templateHandler() {
   return {
     handle(text: string, position: Position): null | Hover {
       const matchers = ["'", '"', ' ']
@@ -40,6 +47,53 @@ function phpHandler() {
   }
 }
 
+function twigHandler() {
+  function filterHandler(text: string, position: Position): null | Hover {
+    const matches = matchTwigFilters(text)
+
+    for (let match of matches) {
+      if (
+        match.position.start <= position.character &&
+        match.position.end >= position.character
+      ) {
+        const filter = items.getFilter(match.name)
+        if (!filter) {
+          continue
+        }
+
+        return {
+          contents: {
+            kind: MarkupKind.Markdown,
+            value: filter.fullName,
+          },
+          range: Range.create(
+            Position.create(position.line, match.position.start),
+            Position.create(position.line, match.position.end)
+          ),
+        } as Hover
+      }
+    }
+
+    return null
+  }
+
+  return {
+    handle(text: string, position: Position): null | Hover {
+      for (let _handler of [filterHandler]) {
+        const hover = _handler(text, position)
+        if (hover) {
+          return hover
+        }
+      }
+
+      return null
+    },
+    support(document: TextDocument) {
+      return ['twig', 'plaintext'].includes(document.languageId)
+    },
+  }
+}
+
 export default function hoverHandler(
   document: TextDocument,
   params: HoverParams,
@@ -50,14 +104,13 @@ export default function hoverHandler(
     end: { line: params.position.line + 1, character: 0 },
   })
 
-  for (const handler of [phpHandler()]) {
+  for (const handler of [templateHandler(), twigHandler()]) {
     if (handler.support(document)) {
       const hover = handler.handle(lineText, params.position)
       if (null !== hover) {
         emitter.emit('hoverHandled', hover)
+        return hover
       }
-
-      return hover
     }
   }
 

@@ -10,5 +10,8 @@ export default function memoryStorage<T>() {
 
       return items.get(key)
     },
+    all() {
+      return new Map(items)
+    },
   }
 }

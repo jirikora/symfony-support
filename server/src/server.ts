@@ -1,4 +1,5 @@
 import {
+  CompletionItem,
   createConnection,
   ProposedFeatures,
   TextDocuments,
@@ -9,6 +10,7 @@ import { EventEmitter } from 'node:events'
 import twig from './twig'
 import definitionHandler from './handler/definitionHandler'
 import hoverHandler from './handler/hoverHandler'
+import completionHandler from './handler/completionHandler'
 
 const documents = new TextDocuments(TextDocument)
 const connection = createConnection(ProposedFeatures.all)
@@ -27,7 +29,9 @@ connection.onInitialize((params) => {
     capabilities: {
       definitionProvider: true,
       hoverProvider: true,
-      // typeDefinitionProvider: true
+      completionProvider: {
+        resolveProvider: false,
+      },
     },
   }
 })
@@ -63,6 +67,15 @@ connection.onHover((params) => {
   }
 
   return result
+})
+
+connection.onCompletion((params) => {
+  const document = documents.get(params.textDocument.uri)
+  if (!document) {
+    return null
+  }
+
+  return completionHandler(document, params, emitter)
 })
 
 documents.listen(connection)

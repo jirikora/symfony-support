@@ -3,6 +3,7 @@ import { storageAdapter } from './storage/storageAdapter'
 import TwigTemplate from './model/twigTemplate'
 import { getAllFilesInDir } from './utils'
 import { resolve } from 'node:path'
+import TwigFilter from './model/twigFilter'
 
 type Twig = {
   filters: object
@@ -44,6 +45,12 @@ export function run(type: string) {
             )
         }
       }
+    }
+
+    for (const [name, args] of Object.entries(twig.filters)) {
+      storageAdapter()
+        .twig()
+        .addFilter(name, new TwigFilter(name, args ?? []))
     }
   })
 }
