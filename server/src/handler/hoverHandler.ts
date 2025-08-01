@@ -8,7 +8,6 @@ import {
   Range,
 } from 'vscode-languageserver'
 import { TypedEventEmitter } from '../types/message'
-import matchTwigFilters from './matcher/matchTwigFilters'
 
 const items = storageAdapter().twig()
 
@@ -49,37 +48,16 @@ function templateHandler() {
 
 function twigHandler() {
   function filterHandler(text: string, position: Position): null | Hover {
-    const matches = matchTwigFilters(text)
+    return null
+  }
 
-    for (let match of matches) {
-      if (
-        match.position.start <= position.character &&
-        match.position.end >= position.character
-      ) {
-        const filter = items.getFilter(match.name)
-        if (!filter) {
-          continue
-        }
-
-        return {
-          contents: {
-            kind: MarkupKind.Markdown,
-            value: filter.fullName,
-          },
-          range: Range.create(
-            Position.create(position.line, match.position.start),
-            Position.create(position.line, match.position.end)
-          ),
-        } as Hover
-      }
-    }
-
+  function functionHandler(text: string, position: Position): null | Hover {
     return null
   }
 
   return {
     handle(text: string, position: Position): null | Hover {
-      for (let _handler of [filterHandler]) {
+      for (let _handler of [filterHandler, functionHandler]) {
         const hover = _handler(text, position)
         if (hover) {
           return hover

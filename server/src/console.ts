@@ -4,6 +4,7 @@ import TwigTemplate from './model/twigTemplate'
 import { getAllFilesInDir } from './utils'
 import { resolve } from 'node:path'
 import TwigFilter from './model/twigFilter'
+import TwigFunction from './model/twigFuntion'
 
 type Twig = {
   filters: object
@@ -51,6 +52,12 @@ export function run(type: string) {
       storageAdapter()
         .twig()
         .addFilter(name, new TwigFilter(name, args ?? []))
+    }
+
+    for (const [name, args] of Object.entries(twig.functions)) {
+      storageAdapter()
+        .twig()
+        .addFunction(name, new TwigFunction(name, args ?? []))
     }
   })
 }

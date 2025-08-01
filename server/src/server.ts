@@ -31,6 +31,7 @@ connection.onInitialize((params) => {
       hoverProvider: true,
       completionProvider: {
         resolveProvider: false,
+        triggerCharacters: ['|', '| '],
       },
     },
   }
